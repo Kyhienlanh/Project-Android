@@ -1,0 +1,20 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+        <!-- Màu nền -->
+        <item>
+                <shape android:shape="rectangle">
+                        <solid android:color="#42A5F5" /> <!-- Màu nền là #2196F3 -->
+                        <corners android:radius="24dp" />
+                </shape>
+        </item>
+        <!-- Ripple effect -->
+        <item android:id="@android:id/background">
+                <ripple android:color="@color/blue"> <!-- Màu ripple -->
+                        <item android:id="@android:id/mask">
+                                <shape android:shape="rectangle">
+                                        <corners android:radius="24dp" />
+                                        <solid android:color="@android:color/white" />
+                                </shape>
+                        </item>
+                </ripple>
+        </item>
+</layer-list>

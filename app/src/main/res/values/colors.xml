@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="vang">#FFFF00</color> <!-- Màu vàng -->
+    <color name="green">#00FF00</color> <!-- Màu xanh lá cây -->
+    <color name="iconColorSelected">#FF0000</color> <!-- Màu khi icon được chọn -->
+    <color name="iconColorNormal">#000000</color>  <!-- Màu khi icon không được chọn -->
+    <color name="grey">#E0E0E0</color>
+    <color name="colorStart">#000000</color>  <!-- Màu khi icon không được chọn -->
+    <color name="colorEnd">#E0E0E0</color>
+    <color name="Trangduc">#FAFAFA</color>
+    <color name="blue">#1E88E5</color>
+    <color name="colorPressed">#FF4081</color> <!-- Màu khi nhấn (màu hồng) -->
+    <color name="my_light_primary">#2196F3</color> <!-- Màu xanh dương -->
+    <color name="my_dark_primary">#BB86FC</color> <!-- Màu xanh dương nhạt cho chế độ tối -->
+    <color name="your_desired_color">#FF5722</color> <!-- Màu cam cho nút -->
+
+
+</resources>
