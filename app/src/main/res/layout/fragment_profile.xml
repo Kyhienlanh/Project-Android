@@ -19,8 +19,8 @@
         <!-- Icon nằm bên trái -->
         <ImageView
             android:id="@+id/iconHome"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/baseline_https_24"
@@ -32,8 +32,8 @@
         <!-- Icon nằm bên phải -->
         <ImageView
             android:id="@+id/iconSearch"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/baseline_chat_24"
@@ -44,8 +44,8 @@
 
         <ImageView
             android:id="@+id/iconNotifications"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/baseline_add_24"
@@ -56,8 +56,8 @@
 
         <ImageView
             android:id="@+id/iconSettings"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/baseline_format_list_bulleted_24"
             android:contentDescription="Settings"
@@ -66,7 +66,7 @@
             app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Top section for avatar, name, and stats -->
+    <!-- Top section for avatar, name, stats -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topSection"
         android:layout_width="match_parent"
@@ -88,6 +88,16 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
             app:shapeAppearanceOverlay="@style/CircularImageView" />
+        <ImageView
+            android:id="@+id/addButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginStart="-20dp"
+            android:src="@drawable/baseline_add_box_24"
+            android:contentDescription="Add button"
+            app:layout_constraintStart_toEndOf="@id/avatarImageView"
+            app:layout_constraintTop_toTopOf="@id/avatarImageView" />
 
         <!-- User Info: Username -->
         <TextView
@@ -135,6 +145,22 @@
                 android:text="160 following"
                 android:textSize="16sp" />
         </LinearLayout>
+
+        <!-- Biography TextView -->
+        <TextView
+            android:id="@+id/biographyTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="68dp"
+            android:layout_marginEnd="20dp"
+            android:text="This is a sample biography text that describes the user."
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/statsLayout" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Edit Profile and View Archive buttons -->

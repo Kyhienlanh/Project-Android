@@ -1,6 +1,7 @@
 package com.example.projectdemo
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -103,6 +104,8 @@ class RegisterFragment : Fragment() {
 
         return view
     }
+
+
 
     private fun showDatePickerDialog(editText: EditText) {
         val calendar = Calendar.getInstance()

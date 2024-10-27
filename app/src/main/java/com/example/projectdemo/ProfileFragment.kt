@@ -1,10 +1,30 @@
 package com.example.projectdemo
 
+import android.app.Activity
+import android.app.Activity.RESULT_OK
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import com.bumptech.glide.Glide
+import com.google.android.gms.cast.framework.media.ImagePicker
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -17,9 +37,17 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class ProfileFragment : Fragment() {
-    // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var database: DatabaseReference
+
+    private lateinit var usernameTextView: TextView
+    private lateinit var postsTextView: TextView
+    private lateinit var followersTextView: TextView
+    private lateinit var followingTextView: TextView
+    private lateinit var biographyTextView: TextView
+    private lateinit var img: ShapeableImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,20 +61,76 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        val view = inflater.inflate(R.layout.fragment_profile, container, false)
+
+        // Khởi tạo Firebase
+        firebaseAuth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance().getReference("Users")
+
+        // Khởi tạo các View
+        usernameTextView = view.findViewById(R.id.usernameTextView)
+        postsTextView = view.findViewById(R.id.postsTextView)
+        followersTextView = view.findViewById(R.id.followersTextView)
+        followingTextView = view.findViewById(R.id.followingTextView)
+        biographyTextView = view.findViewById(R.id.biographyTextView)
+        img = view.findViewById(R.id.avatarImageView)
+
+        // Lấy thông tin người dùng
+        loadUserData()
+
+        // Thiết lập sự kiện cho nút chỉnh sửa
+        val editProfileButton = view.findViewById<Button>(R.id.editProfileButton)
+        editProfileButton.setOnClickListener {
+            startActivity(Intent(requireContext(), changeProfilenewMainActivity3::class.java))
+        }
+
+        return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadUserData() // Tải lại thông tin người dùng khi Fragment hiển thị
+    }
+
+    private fun loadUserData() {
+        val userID = firebaseAuth.currentUser?.uid
+
+        // Lấy dữ liệu người dùng từ Firebase
+        if (userID != null) {
+            database.child(userID).addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        val user = dataSnapshot.getValue(User::class.java)
+                        user?.let { updateUI(it) } // Cập nhật UI nếu người dùng không null
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("Firebase", "Lỗi khi truy cập dữ liệu người dùng: ${databaseError.message}")
+                }
+            })
+        } else {
+            Log.e("Firebase", "Người dùng chưa đăng nhập.")
+        }
+    }
+
+    private fun updateUI(user: User) {
+        usernameTextView.text = user.name
+        postsTextView.text = "${user.post} post"
+        followersTextView.text = "${user.followers} follower"
+        followingTextView.text = "${user.following} following"
+        biographyTextView.text = user.biography
+
+        // Hiển thị avatar
+        val avatarUrl = user.img
+        if (!avatarUrl.isNullOrEmpty()) {
+            Glide.with(requireActivity())
+                .load(avatarUrl)
+                .into(img)
+        }
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ProfileFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             ProfileFragment().apply {

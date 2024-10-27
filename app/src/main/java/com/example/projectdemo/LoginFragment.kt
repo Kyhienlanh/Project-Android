@@ -62,6 +62,14 @@ class LoginFragment : Fragment() {
 
         return view
     }
+    override fun onStart() {
+        super.onStart()
+        if (firebaseAuth.currentUser !=null){
+            val intent =Intent(requireContext(),MainActivity::class.java)
+            startActivity(intent)
+        }
+
+    }
 
 
 }
