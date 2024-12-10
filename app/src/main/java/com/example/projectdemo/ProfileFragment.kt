@@ -126,7 +126,9 @@ class ProfileFragment : Fragment() {
         if (!avatarUrl.isNullOrEmpty()) {
             Glide.with(requireActivity())
                 .load(avatarUrl)
+                .placeholder(R.drawable.circle_background)
                 .into(img)
+
         }
     }
 

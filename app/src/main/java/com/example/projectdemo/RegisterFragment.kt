@@ -54,7 +54,10 @@ class RegisterFragment : Fragment() {
         val editTextPassword = view.findViewById<EditText>(R.id.editTextPassword)
         val editTextConfirmPassword = view.findViewById<EditText>(R.id.editTextConfirmPassword)
         val editTextFullName = view.findViewById<EditText>(R.id.editTextFullName)
-
+        val textViewForgotPassword=view.findViewById<TextView>(R.id.textViewForgotPassword)
+        textViewForgotPassword.setOnClickListener(){
+            Navigation.findNavController(view).navigate(R.id.action_registerFragment_to_forgotPasswordFragment2)
+        }
         // Register Button
         val buttonRegister = view.findViewById<Button>(R.id.buttonRegister)
         buttonRegister.setOnClickListener {

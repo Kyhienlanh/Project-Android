@@ -28,9 +28,9 @@ class PostAdapter(private val postList: List<Post>) : RecyclerView.Adapter<PostA
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = postList[position]
         // Set avatar, username, post image, likes, content here
-        holder.usernameTextView.text = post.username
-        holder.postContentTextView.text = post.content
-        holder.likeCountTextView.text = "${post.likeCount} likes"
+//        holder.usernameTextView.text = post.username
+//        holder.postContentTextView.text = post.content
+//        holder.likeCountTextView.text = "${post.likeCount} likes"
         // Load images using Glide or Picasso for avatar and post image
     }
 

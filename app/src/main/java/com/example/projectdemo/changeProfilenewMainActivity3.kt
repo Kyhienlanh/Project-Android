@@ -9,10 +9,12 @@ import android.util.Log
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -58,7 +60,7 @@ class changeProfilenewMainActivity3 : AppCompatActivity() {
         val usernameTextView = findViewById<TextView>(R.id.editTextText)
         val tieusu = findViewById<TextView>(R.id.editTextText2)
         val gt = findViewById<TextView>(R.id.gt)
-
+        val DangXuat= findViewById<TextView>(R.id.editTextText3)
         // Lấy dữ liệu người dùng từ Firebase
         if (userID != null) {
             database.child(userID).addListenerForSingleValueEvent(object : ValueEventListener {
@@ -69,6 +71,11 @@ class changeProfilenewMainActivity3 : AppCompatActivity() {
                             usernameTextView.text = user.name
                             tieusu.text = user.biography
                             gt.text = user.gender
+                            Glide.with(this@changeProfilenewMainActivity3)
+                                .load(user.img)
+                                .placeholder(R.drawable.circle_background)
+                                .error(R.drawable.ic_launcher_foreground)
+                                .into(avatarImageView)
                         }
                     }
                 }
@@ -85,6 +92,18 @@ class changeProfilenewMainActivity3 : AppCompatActivity() {
         usernameTextView.setOnClickListener { showEditDialog("Tên", usernameTextView) }
         tieusu.setOnClickListener { showEditDialog("Tiểu sử", tieusu) }
         gt.setOnClickListener { showGenderDialog() }
+        DangXuat.setOnClickListener {
+            val firebaseAuth = FirebaseAuth.getInstance()
+            firebaseAuth.signOut()
+            if (firebaseAuth.currentUser == null) {
+                // Điều hướng về MainActivity
+                val intent = Intent(this, LoginMainActivity2::class.java)
+                startActivity(intent)
+                finish() // Kết thúc Activity hiện tại để không quay lại được
+            } else {
+                Toast.makeText(this, "Đăng xuất thất bại!", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // Thiết lập sự kiện cho nút quay lại
         val imageView2 = findViewById<ImageView>(R.id.imageView2)

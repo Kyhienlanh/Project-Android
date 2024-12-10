@@ -30,19 +30,19 @@ class HomeFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         // Khởi tạo RecyclerView
-        recyclerView = view.findViewById(R.id.postsRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
+//        recyclerView = view.findViewById(R.id.postsRecyclerView)
+//        recyclerView.layoutManager = LinearLayoutManager(context)
 
         // Tạo danh sách mẫu cho các bài đăng
-        val postList = listOf(
-            Post("user1", "avatar_url", "post_url", 120, "First post content"),
-            Post("user2", "avatar_url", "post_url", 85, "Second post content"),
-            Post("user3", "avatar_url", "post_url", 105, "Thirst post content")
-        )
+//        val postList = listOf(
+//            Post("user1", "avatar_url", "post_url", 120, "First post content"),
+//            Post("user2", "avatar_url", "post_url", 85, "Second post content"),
+//            Post("user3", "avatar_url", "post_url", 105, "Thirst post content")
+//        )
 
         // Gán adapter cho RecyclerView
-        postAdapter = PostAdapter(postList)
-        recyclerView.adapter = postAdapter
+//        postAdapter = PostAdapter(postList)
+//        recyclerView.adapter = postAdapter
 
         return view
     }

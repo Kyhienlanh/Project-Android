@@ -42,6 +42,7 @@ android {
 dependencies {
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.github.bumptech.glide:glide:4.11.0")
+    implementation(libs.play.services.location)
     annotationProcessor ("com.github.bumptech.glide:compiler:4.11.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

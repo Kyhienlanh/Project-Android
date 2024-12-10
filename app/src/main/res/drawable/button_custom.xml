@@ -1,0 +1,10 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Màu nền của Button -->
+    <solid android:color="@color/ChuDao" />
+
+    <!-- Bo góc cho Button -->
+    <corners android:radius="12dp" /> <!-- Bạn có thể thay đổi giá trị radius tùy theo mong muốn -->
+
+    <!-- Đường viền (tùy chọn) -->
+    <stroke android:color="@android:color/white" android:width="2dp" />
+</shape>

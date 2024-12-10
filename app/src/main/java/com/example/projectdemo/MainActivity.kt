@@ -1,5 +1,7 @@
 package com.example.projectdemo
 
+import android.app.Activity
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity() {
                 intArrayOf(-android.R.attr.state_checked) // Trạng thái không được chọn
             ),
             intArrayOf(
-                Color.parseColor("#4FC3F7"), // Màu cho icon khi được chọn
+                Color.parseColor("#1877F2"), // Màu cho icon khi được chọn
                 Color.parseColor("#000000") // Màu cho icon khi không được chọn
             )
         )
@@ -45,7 +47,9 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.NewsFeed->{
-                    replaceFragment(NewsFeedFragment())
+
+                    val intent = Intent(this, AddNewsFeed::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.nofications->{

@@ -5,6 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import androidx.navigation.Navigation
+import com.google.firebase.auth.FirebaseAuth
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -33,9 +39,45 @@ class ForgotPasswordFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_forgot_password, container, false)
+        val view = inflater.inflate(R.layout.fragment_forgot_password, container, false)
+
+        // Tìm các View trong layout
+        val editTextEmail = view.findViewById<EditText>(R.id.editTextEmail)
+        val buttonSendEmail = view.findViewById<Button>(R.id.buttonSendEmail)
+        val textViewBackToLogin = view.findViewById<TextView>(R.id.textViewBackToLogin)
+
+        // Xử lý sự kiện nhấn nút gửi email
+        buttonSendEmail.setOnClickListener {
+            val email = editTextEmail.text.toString().trim()
+
+            if (email.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập email!", Toast.LENGTH_SHORT).show()
+            } else {
+                FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(requireContext(), "Email khôi phục đã được gửi!", Toast.LENGTH_SHORT).show()
+                            // Điều hướng trở lại LoginFragment
+                            Navigation.findNavController(view).navigate(R.id.action_forgotPasswordFragment_to_loginFragment)
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                task.exception?.message ?: "Đã xảy ra lỗi!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+            }
+        }
+
+        // Xử lý sự kiện nhấn "Quay lại đăng nhập"
+        textViewBackToLogin.setOnClickListener {
+            Navigation.findNavController(view).navigate(R.id.action_forgotPasswordFragment_to_loginFragment)
+        }
+
+        return view
     }
+
 
     companion object {
         /**

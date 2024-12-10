@@ -39,6 +39,10 @@ class LoginFragment : Fragment() {
         // Username and Password EditTexts
         val editTextUsername = view.findViewById<EditText>(R.id.editTextUsername)
         val editTextPassword = view.findViewById<EditText>(R.id.editTextPassword)
+        val textViewForgotPassword=view.findViewById<TextView>(R.id.textViewForgotPassword)
+        textViewForgotPassword.setOnClickListener {
+            Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
+        }
 
         // Login Button
         val buttonLogin = view.findViewById<Button>(R.id.button)
