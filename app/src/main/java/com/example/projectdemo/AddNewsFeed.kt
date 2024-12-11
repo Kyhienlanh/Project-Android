@@ -5,13 +5,16 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -34,6 +37,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 
 class AddNewsFeed : AppCompatActivity() {
 
@@ -53,7 +58,8 @@ class AddNewsFeed : AppCompatActivity() {
     private lateinit var Vitri:TextView
     private lateinit var MauNen:TextView
     private lateinit var Camera:TextView
-
+    private lateinit var imageView6:ImageView
+    private lateinit var progressBar2: ProgressBar
     var textIcon:String=""
     var IDIcon:Int=0
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +81,8 @@ class AddNewsFeed : AppCompatActivity() {
         Vitri=findViewById(R.id.Vitri)
         MauNen=findViewById(R.id.MauNen)
         Camera=findViewById(R.id.Camera)
+        imageView6=findViewById(R.id.imageView6)
+        progressBar2=findViewById(R.id.progressBar2)
 
 
         // Mở album ngay khi Activity được tạo
@@ -86,6 +94,16 @@ class AddNewsFeed : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        imageView6.setOnClickListener(){
+            val options = arrayOf("Công khai", "Riêng tư")
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Chọn trạng thái")
+            builder.setItems(options) { dialog, which ->
+
+                TrangThai.text = options[which]
+            }
+            builder.show()
+        }
         ChonAnh.setOnClickListener(){
             openGallery()
         }
@@ -93,6 +111,10 @@ class AddNewsFeed : AppCompatActivity() {
             requestCameraPermission()
         }
         Vitri.setOnClickListener(){
+        }
+        back.setOnClickListener(){
+            var intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
         val fontList = listOf("Default", "Bold", "Italic", "Serif", "Sans Serif", "Monospace")
 
@@ -130,6 +152,10 @@ class AddNewsFeed : AppCompatActivity() {
             val intent = Intent(this, BieuCam::class.java)
             startActivityForResult(intent, 1)  // Sử dụng mã request code 1
         }
+        Post.setOnClickListener(){
+            uploadImageFromImageView()
+        }
+
 
 
 
@@ -138,10 +164,11 @@ class AddNewsFeed : AppCompatActivity() {
 
 
     companion object {
-        const val PICK_IMAGE_REQUEST = 1001 // Mã yêu cầu để nhận kết quả chọn ảnh
+        const val PICK_IMAGE_REQUEST = 1001
         const val REQUEST_CAMERA_PERMISSION = 1002
-
+        const val CROP_IMAGE_REQUEST = 1003
     }
+
     // Mở album để chọn ảnh
     private fun openGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -177,6 +204,7 @@ class AddNewsFeed : AppCompatActivity() {
     }
 
     private fun loadUserData() {
+        progressBar2.visibility = View.VISIBLE
         val userID = firebaseAuth.currentUser?.uid
 
         // Lấy dữ liệu người dùng từ Firebase
@@ -186,6 +214,7 @@ class AddNewsFeed : AppCompatActivity() {
                     if (dataSnapshot.exists()) {
                         val user = dataSnapshot.getValue(User::class.java)
                         user?.let { updateUI(it) } // Cập nhật UI nếu người dùng không null
+                        progressBar2.visibility = View.GONE
                     }
                 }
 
@@ -225,6 +254,83 @@ class AddNewsFeed : AppCompatActivity() {
             openCamera()
         }
     }
+    private fun uploadImageFromImageView() {
+        // Lấy drawable từ ImageView
+        progressBar2.visibility = View.VISIBLE
+        val drawable = imageView10.drawable
+        if (drawable == null) {
+            Toast.makeText(this, "Hình ảnh không tồn tại!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Chuyển drawable thành Bitmap
+        val bitmap = (drawable as BitmapDrawable).bitmap
+
+        // Chuyển Bitmap thành ByteArray
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream) // Nén ảnh
+        val imageData = byteArrayOutputStream.toByteArray()
+
+        // Tạo đường dẫn lưu trữ trong Firebase Storage
+        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown_user"
+        val storageRef = FirebaseStorage.getInstance().getReference("post_images/$userID/${System.currentTimeMillis()}.jpg")
+
+        // Upload ByteArray lên Firebase Storage
+        val uploadTask = storageRef.putBytes(imageData)
+        uploadTask.addOnSuccessListener {
+            // Lấy URL của hình ảnh sau khi upload thành công
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                val imageUrl = uri.toString()
+                savePostToDatabase(imageUrl)
+                Toast.makeText(this, "Upload thành công: $imageUrl", Toast.LENGTH_SHORT).show()
+
+                progressBar2.visibility = View.GONE
+            }
+        }.addOnFailureListener { e ->
+            Toast.makeText(this, "Upload thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Lưu bài đăng vào Firebase Realtime Database
+    private fun savePostToDatabase(imageUrl: String) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val databaseRef = FirebaseDatabase.getInstance().getReference("posts/$currentUserId")
+
+        // Tạo postID duy nhất
+        val postID = databaseRef.push().key ?: return
+
+        // Tạo một đối tượng bài đăng với thông tin người dùng nhập
+        val post = Post(
+            postID = postID,
+            userID = currentUserId,
+            content = NoiDung.text.toString(),
+            CamSucHoatDong = "$textIcon", // Ví dụ, bạn có thể thay đổi tùy theo trạng thái
+            GanTheNguoiKhac = "taggedUserID", // Gắn thẻ người dùng (tùy chỉnh)
+            MauNen = "${NoiDung.typeface.toString()}", // Màu nền mặc định
+            imageURL = imageUrl,
+            timestamp = System.currentTimeMillis(),
+            likes = 0,
+            commentsCount = 0,
+            likedBy = listOf(),
+            sharedCount = 0,
+            status = TrangThai.text.toString(),
+            location = ""
+        )
+
+        // Lưu bài đăng vào Firebase Realtime Database
+        databaseRef.child(postID).setValue(post)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(this, "Lưu bài đăng vào Database thành công!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Lưu bài đăng thất bại: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+
+
+
 
 }
 

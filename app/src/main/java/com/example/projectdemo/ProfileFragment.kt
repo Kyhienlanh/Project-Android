@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -48,7 +49,7 @@ class ProfileFragment : Fragment() {
     private lateinit var followingTextView: TextView
     private lateinit var biographyTextView: TextView
     private lateinit var img: ShapeableImageView
-
+    private lateinit var progressBar3: ProgressBar
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -74,7 +75,7 @@ class ProfileFragment : Fragment() {
         followingTextView = view.findViewById(R.id.followingTextView)
         biographyTextView = view.findViewById(R.id.biographyTextView)
         img = view.findViewById(R.id.avatarImageView)
-
+        progressBar3=view.findViewById(R.id.progressBar3)
         // Lấy thông tin người dùng
         loadUserData()
 
@@ -93,6 +94,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
+        progressBar3.visibility = View.VISIBLE
         val userID = firebaseAuth.currentUser?.uid
 
         // Lấy dữ liệu người dùng từ Firebase
@@ -102,15 +104,18 @@ class ProfileFragment : Fragment() {
                     if (dataSnapshot.exists()) {
                         val user = dataSnapshot.getValue(User::class.java)
                         user?.let { updateUI(it) } // Cập nhật UI nếu người dùng không null
+                        progressBar3.visibility = View.GONE
                     }
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
                     Log.e("Firebase", "Lỗi khi truy cập dữ liệu người dùng: ${databaseError.message}")
+                    progressBar3.visibility = View.GONE
                 }
             })
         } else {
             Log.e("Firebase", "Người dùng chưa đăng nhập.")
+            progressBar3.visibility = View.GONE
         }
     }
 

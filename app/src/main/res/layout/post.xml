@@ -1,103 +1,128 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="20dp"
-    android:padding="8dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:id="@+id/layoutmain"
+    android:background="#ffffff">
 
-    <!-- Avatar và Tên người dùng -->
-    <ImageView
-        android:id="@+id/avatarImageView"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="8dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/lion"
-        android:background="@drawable/circle_background"
-        android:clipToOutline="true"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="User Avatar"/>
-
-    <TextView
-        android:id="@+id/usernameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Username"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/avatarImageView"
-        app:layout_constraintTop_toTopOf="@id/avatarImageView" />
-
-    <!-- Ảnh bài viết -->
-    <ImageView
-        android:id="@+id/postImageView"
-        android:layout_width="0dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="8dp"
-        android:contentDescription="Post Image"
-        android:scaleType="centerCrop"
-        android:src="@drawable/lion"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/avatarImageView" />
-
-    <!-- Biểu tượng Like, Comment, Share -->
+    <!-- Header: Username and Location -->
     <LinearLayout
-        android:id="@+id/iconsLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/postImageView"
-        app:layout_constraintStart_toStartOf="parent">
+        android:paddingBottom="8dp">
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/userAvatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/lion"
+            app:shapeAppearanceOverlay="@style/CircularImageView" />
+
+        <!-- Username and location -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location"
+                android:textSize="12sp"
+                android:textColor="#888888" />
+        </LinearLayout>
+
+        <!-- Options icon (menu, etc.) -->
         <ImageView
-            android:id="@+id/likeIcon"
+            android:id="@+id/optionsIcon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/baseline_heart_broken_24"
-            android:contentDescription="Like Icon" />
-
-        <ImageView
-            android:id="@+id/commentIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/baseline_add_comment_24"
-            android:contentDescription="Comment Icon" />
-
-        <ImageView
-            android:id="@+id/shareIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/baseline_heart_broken_24"
-            android:contentDescription="Share Icon" />
+            android:src="@drawable/option" />
     </LinearLayout>
 
-    <!-- Số lượng Like -->
+    <!-- Post content -->
     <TextView
-        android:id="@+id/likeCountTextView"
+        android:id="@+id/postContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This is the post content"
+        android:textSize="14sp"
+        android:lineSpacingExtra="4dp" />
+
+    <!-- Image of the post (if any) -->
+
+
+    <!-- Footer: Like, Comment, Share buttons -->
+
+    <ImageView
+        android:id="@+id/postImage"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/lion" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <!-- Like button -->
+        <ImageView
+            android:id="@+id/likeButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/timtrang"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Comment button -->
+        <ImageView
+            android:id="@+id/commentButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/cmt"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Share button -->
+        <ImageView
+            android:id="@+id/shareButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/share" />
+    </LinearLayout>
+
+    <!-- Like count and comment count -->
+    <TextView
+        android:id="@+id/likeCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="100 likes"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/iconsLayout" />
+        android:text="Likes: 0"
+        android:textSize="12sp"
+        android:textColor="#888888"
+        android:paddingBottom="4dp" />
 
-    <!-- Nội dung bài viết -->
     <TextView
-        android:id="@+id/postContentTextView"
-        android:layout_width="0dp"
+        android:id="@+id/commentCount"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Here is the content of the post."
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/likeCountTextView" />
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:text="Comments: 0"
+        android:textSize="12sp"
+        android:textColor="#888888" />
+</LinearLayout>
