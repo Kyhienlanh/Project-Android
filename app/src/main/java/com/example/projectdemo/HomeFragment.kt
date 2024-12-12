@@ -1,14 +1,27 @@
 package com.example.projectdemo
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
+import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -20,106 +33,71 @@ private const val ARG_PARAM2 = "param2"
  * Use the [HomeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+
 class HomeFragment : Fragment(), OnPostActionListener {
-    private lateinit var postAdapter: PostAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var mainLayout: ConstraintLayout
+    private lateinit var postAdapter: PostAdapter
+    private lateinit var firebaseAuth:FirebaseAuth
+    private val postList = mutableListOf<Post>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         // Khởi tạo RecyclerView
         recyclerView = view.findViewById(R.id.postsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        mainLayout =view.findViewById(R.id.mainlayout)
+        mainLayout = view.findViewById(R.id.mainlayout)
+        firebaseAuth = FirebaseAuth.getInstance()
 
-        val samplePosts = listOf(
-            Post(
-                postID = "1",
-                userID = "user_01",
-                content = "Hôm nay là một ngày thật đẹp trời! 🌞",
-                CamSucHoatDong = "Đi dạo công viên",
-                GanTheNguoiKhac = "Bạn bè",
-                MauNen = "#FFD700",
-                imageURL = "https://th.bing.com/th/id/OIP.avb9nDfw3kq7NOoP0grM4wHaEK?rs=1&pid=ImgDetMain",
-                timestamp = System.currentTimeMillis() - 3600000,
-                likes = 123,
-                commentsCount = 10,
-                likedBy = listOf("user_02", "user_03"),
-                sharedCount = 5,
-                status = "public",
-                location = "Công viên thành phố"
-            ),
-            Post(
-                postID = "2",
-                userID = "user_02",
-                content = "Một bữa ăn thật ngon! 🍕🍔",
-                CamSucHoatDong = "Ăn uống",
-                imageURL = "https://th.bing.com/th/id/OIP.Uh5kcavlK6oBgFr9AJnSrgHaEK?w=1280&h=720&rs=1&pid=ImgDetMain",
-                timestamp = System.currentTimeMillis() - 7200000,
-                likes = 56,
-                commentsCount = 4,
-                likedBy = listOf("user_01", "user_04"),
-                sharedCount = 2,
-                status = "public",
-                location = "Nhà hàng ABC"
-            ),
-            Post(
-                postID = "3",
-                userID = "user_03",
-                content = "Thử thách leo núi đầu tiên trong đời! 🧗‍♂️",
-                CamSucHoatDong = "Thể thao",
-                imageURL = "https://th.bing.com/th/id/OIP.LUgS1OBIc6idv8x6hJ_G_wHaNN?w=236&h=421&c=7&o=5&pid=1.20",
-                timestamp = System.currentTimeMillis() - 10800000,
-                likes = 200,
-                commentsCount = 25,
-                likedBy = listOf("user_01", "user_02", "user_04"),
-                sharedCount = 10,
-                status = "private",
-                location = "Núi XYZ"
-            ),
-            Post(
-                postID = "4",
-                userID = "user_04",
-                content = "Chỉ là một ngày bình thường với tách cà phê ☕",
-                timestamp = System.currentTimeMillis() - 21600000,
-                likes = 32,
-                commentsCount = 1,
-                likedBy = listOf("user_03"),
-                sharedCount = 0,
-                status = "public",
-                location = "Quán cà phê 123"
-            ),
-            Post(
-                postID = "5",
-                userID = "user_05",
-                content = "Hãy sống thật tích cực và yêu thương nhau! ❤️",
-                CamSucHoatDong = "Chia sẻ cảm xúc",
-                timestamp = System.currentTimeMillis() - 43200000,
-                likes = 150,
-                commentsCount = 30,
-                likedBy = listOf("user_01", "user_02", "user_03", "user_04"),
-                sharedCount = 20,
-                status = "public"
-            )
-        )
-
-        // Khởi tạo adapter với dữ liệu giả lập và listener
-        postAdapter = PostAdapter(samplePosts, this)
+        var userID=firebaseAuth.currentUser?.uid.toString()
+        // Khởi tạo Adapter
+        postAdapter = PostAdapter(postList,this@HomeFragment,userID)
         recyclerView.adapter = postAdapter
+
+        // Load dữ liệu từ Firebase
+        loadPostsFromFirebase()
 
         return view
     }
+    private fun loadPostsFromFirebase() {
+        val databaseReference = FirebaseDatabase.getInstance().getReference("posts")
 
-    // Implement the callback methods
-    override fun onLikeClicked(post: Post) {
-        Toast.makeText(context, "Liked post by: ${post.userID}", Toast.LENGTH_SHORT).show()
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                postList.clear() // Xóa dữ liệu cũ trước khi thêm mới
+
+                // Duyệt qua tất cả các userID
+                for (userSnapshot in snapshot.children) {
+                    // Duyệt qua tất cả các postID của user
+                    for (postSnapshot in userSnapshot.children) {
+                        val post = postSnapshot.getValue(Post::class.java)
+                        post?.let { postList.add(it) } // Thêm bài viết vào danh sách nếu không null
+                    }
+                }
+
+                // Cập nhật adapter sau khi dữ liệu thay đổi
+                postAdapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Xử lý lỗi nếu có
+                Toast.makeText(context, "Lỗi: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
+
+
+
+    override fun onLikeClicked(post: Post) {
+        var UserID=firebaseAuth.currentUser?.uid.toString()
+        addUserIDToLikedBy(post.postID,UserID)
+
+    }
     override fun onCommentClicked(post: Post) {
         Toast.makeText(context, "Comment on post by: ${post.userID}", Toast.LENGTH_SHORT).show()
     }
@@ -131,5 +109,50 @@ class HomeFragment : Fragment(), OnPostActionListener {
     override fun onOptionsClicked(post: Post) {
         Toast.makeText(context, "Options clicked for post by: ${post.userID}", Toast.LENGTH_SHORT).show()
     }
+    fun addUserIDToLikedBy(postID: String, currentUserID: String) {
+        // Truy cập danh sách tất cả bài viết
+        val postsRef = FirebaseDatabase.getInstance().getReference("posts")
+
+        postsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Tìm bài viết có postID trong tất cả bài viết
+                for (userSnapshot in snapshot.children) {
+                    for (postSnapshot in userSnapshot.children) {
+                        if (postSnapshot.key == postID) {
+                            val post = postSnapshot.getValue(Post::class.java)
+                            if (post != null) {
+                                val postRef = postSnapshot.ref // Lấy tham chiếu trực tiếp đến bài viết
+
+                                if (post.likedBy.contains(currentUserID)) {
+                                    // Nếu user đã thích, bỏ thích (unlike)
+                                    post.likedBy = post.likedBy.filter { it != currentUserID }
+                                    post.likes = post.likedBy.size
+                                } else {
+                                    // Nếu user chưa thích, thêm vào danh sách likedBy
+                                    post.likedBy = post.likedBy + currentUserID
+                                    post.likes = post.likedBy.size
+                                }
+
+                                // Cập nhật lại bài viết trong Firebase
+                                postRef.setValue(post).addOnSuccessListener {
+                                    println("User updated in likedBy and post updated successfully.")
+                                }.addOnFailureListener {
+                                    println("Failed to update post: ${it.message}")
+                                }
+                                return
+                            }
+                        }
+                    }
+                }
+                println("Post with ID $postID not found.")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Error fetching posts: ${error.message}")
+            }
+        })
+    }
+
+
 }
 
