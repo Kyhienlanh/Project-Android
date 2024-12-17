@@ -154,6 +154,7 @@ class AddNewsFeed : AppCompatActivity() {
         }
         Post.setOnClickListener(){
             uploadImageFromImageView()
+
         }
 
 
@@ -285,6 +286,7 @@ class AddNewsFeed : AppCompatActivity() {
                 Toast.makeText(this, "Upload thành công: $imageUrl", Toast.LENGTH_SHORT).show()
 
                 progressBar2.visibility = View.GONE
+
             }
         }.addOnFailureListener { e ->
             Toast.makeText(this, "Upload thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -321,13 +323,43 @@ class AddNewsFeed : AppCompatActivity() {
         databaseRef.child(postID).setValue(post)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    countPosts(currentUserId)
+                    val Intent=Intent(this,MainActivity::class.java)
+                    startActivity(Intent)
                     Toast.makeText(this, "Lưu bài đăng vào Database thành công!", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this, "Lưu bài đăng thất bại: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
+    private fun countPosts(userId: String) {
+        val postsRef = FirebaseDatabase.getInstance().getReference("posts").child(userId)
 
+        // Lấy số lượng bài đăng
+        postsRef.get().addOnSuccessListener { snapshot ->
+            // snapshot chứa tất cả các bài đăng của người dùng
+            val postCount = snapshot.childrenCount // Đếm số lượng bài đăng
+
+            // Cập nhật số lượng bài đăng vào User
+            val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+
+            // Cập nhật số lượng bài đăng vào thuộc tính "postCount" của người dùng
+            userRef.child("post").setValue(postCount).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Cập nhật thành công
+                    Toast.makeText(this, "Số lượng bài đăng đã được cập nhật", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Xử lý lỗi nếu có
+                    Toast.makeText(this, "Lỗi khi cập nhật số lượng bài đăng", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            Toast.makeText(this, "Số lượng bài đăng của người dùng: $postCount", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener { exception ->
+            // Xử lý khi có lỗi trong việc đọc dữ liệu
+            Toast.makeText(this, "Lỗi: ${exception.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
 
 

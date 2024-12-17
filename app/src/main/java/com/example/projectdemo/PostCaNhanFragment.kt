@@ -3,71 +3,63 @@ package com.example.projectdemo
 import android.app.ActivityOptions
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Transition
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.MutableData
-import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 
-class HomeFragment : Fragment(), OnPostActionListener {
+class PostCaNhanFragment : Fragment(),OnPostActionListener {
+    // TODO: Rename and change types of parameters
+    private var param1: String? = null
+    private var param2: String? = null
     private lateinit var recyclerView: RecyclerView
     private lateinit var mainLayout: ConstraintLayout
     private lateinit var postAdapter: PostAdapter
-    private lateinit var firebaseAuth:FirebaseAuth
+    private lateinit var firebaseAuth: FirebaseAuth
     private val postList = mutableListOf<Post>()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            param1 = it.getString(ARG_PARAM1)
+            param2 = it.getString(ARG_PARAM2)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
+        val view = inflater.inflate(R.layout.fragment_post_ca_nhan, container, false)
 
         // Khởi tạo RecyclerView
         recyclerView = view.findViewById(R.id.postsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        mainLayout = view.findViewById(R.id.mainlayout)
         firebaseAuth = FirebaseAuth.getInstance()
 
         var userID=firebaseAuth.currentUser?.uid.toString()
         // Khởi tạo Adapter
-        postAdapter = PostAdapter(postList,this@HomeFragment,userID)
+        postAdapter = PostAdapter(postList,this@PostCaNhanFragment,userID)
         recyclerView.adapter = postAdapter
 
         // Load dữ liệu từ Firebase
@@ -76,19 +68,23 @@ class HomeFragment : Fragment(), OnPostActionListener {
         return view
     }
     private fun loadPostsFromFirebase() {
+        var UserID=firebaseAuth.currentUser?.uid.toString()
         val databaseReference = FirebaseDatabase.getInstance().getReference("posts")
 
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 postList.clear() // Xóa dữ liệu cũ trước khi thêm mới
 
-                // Duyệt qua tất cả các userID
+
                 for (userSnapshot in snapshot.children) {
                     // Duyệt qua tất cả các postID của user
-                    for (postSnapshot in userSnapshot.children) {
-                        val post = postSnapshot.getValue(Post::class.java)
-                        post?.let { postList.add(it) } // Thêm bài viết vào danh sách nếu không null
+                    if(userSnapshot.key==UserID){
+                        for (postSnapshot in userSnapshot.children) {
+                            val post = postSnapshot.getValue(Post::class.java)
+                            post?.let { postList.add(it) }
+                        }
                     }
+
                 }
                 postList.sortByDescending { it.timestamp }
 
@@ -126,21 +122,7 @@ class HomeFragment : Fragment(), OnPostActionListener {
 
 
     override fun onNameClicked(post: Post) {
-        var UserID=firebaseAuth.currentUser?.uid.toString()
-        if(UserID==post.userID){
-            var ProfileFragment=ProfileFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.framelayout, ProfileFragment)
-                .addToBackStack(null)
-                .commit()
-        }
-        else{
-            val bundle = Bundle()
-            bundle.putSerializable("post_data", post.userID)
-            val intent = Intent(requireContext(), TrangCaNhan::class.java)
-            intent.putExtras(bundle)
-            startActivity(intent)
-        }
+        Toast.makeText(context, "click name", Toast.LENGTH_SHORT).show()
     }
     override fun onShareClicked(post: Post) {
         sharePost(post)
@@ -307,7 +289,23 @@ class HomeFragment : Fragment(), OnPostActionListener {
             }
         })
     }
-
-
+    companion object {
+        /**
+         * Use this factory method to create a new instance of
+         * this fragment using the provided parameters.
+         *
+         * @param param1 Parameter 1.
+         * @param param2 Parameter 2.
+         * @return A new instance of fragment PostCaNhanFragment.
+         */
+        // TODO: Rename and change types and number of parameters
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) =
+            PostCaNhanFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, param1)
+                    putString(ARG_PARAM2, param2)
+                }
+            }
+    }
 }
-

@@ -17,6 +17,9 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.gms.cast.framework.media.ImagePicker
 import com.google.android.material.imageview.ShapeableImageView
@@ -37,7 +40,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [ProfileFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(),OnImageClickListener {
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var firebaseAuth: FirebaseAuth
@@ -50,6 +53,10 @@ class ProfileFragment : Fragment() {
     private lateinit var biographyTextView: TextView
     private lateinit var img: ShapeableImageView
     private lateinit var progressBar3: ProgressBar
+    private lateinit var postsRecyclerView:RecyclerView
+    private lateinit var imageAdapter: ImageAdapter
+    private var imageList = mutableListOf<Post>()
+    var postCount1:Long=0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -67,8 +74,7 @@ class ProfileFragment : Fragment() {
         // Khởi tạo Firebase
         firebaseAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().getReference("Users")
-
-        // Khởi tạo các View
+        var userID=firebaseAuth.currentUser?.uid.toString()
         usernameTextView = view.findViewById(R.id.usernameTextView)
         postsTextView = view.findViewById(R.id.postsTextView)
         followersTextView = view.findViewById(R.id.followersTextView)
@@ -76,9 +82,14 @@ class ProfileFragment : Fragment() {
         biographyTextView = view.findViewById(R.id.biographyTextView)
         img = view.findViewById(R.id.avatarImageView)
         progressBar3=view.findViewById(R.id.progressBar3)
-        // Lấy thông tin người dùng
-        loadUserData()
 
+        postsRecyclerView=view.findViewById(R.id.postsRecyclerView)
+        postsRecyclerView.layoutManager = GridLayoutManager(context, 3)
+        imageAdapter = ImageAdapter(imageList, this)
+        postsRecyclerView.adapter = imageAdapter
+
+        loadUserData()
+        loadImageUser()
         // Thiết lập sự kiện cho nút chỉnh sửa
         val editProfileButton = view.findViewById<Button>(R.id.editProfileButton)
         editProfileButton.setOnClickListener {
@@ -88,9 +99,58 @@ class ProfileFragment : Fragment() {
         return view
     }
 
+    override fun onImageClick(post: Post) {
+        val bundle = Bundle()
+        bundle.putSerializable("selected_post", post)
+
+        // Tạo PostCaNhanFragment và chuyển dữ liệu vào arguments
+        val postCaNhanFragment = PostCaNhanFragment()
+        postCaNhanFragment.arguments = bundle
+
+        // Chuyển đến PostCaNhanFragment và truyền dữ liệu
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.framelayout, postCaNhanFragment)
+            .addToBackStack(null)
+            .commit()
+
+    }
+
+
+    fun loadImageUser() {
+        val userID = firebaseAuth.currentUser?.uid
+        val databaseReference = FirebaseDatabase.getInstance().getReference("posts")
+
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                imageList.clear()
+
+                // Duyệt qua tất cả các userID
+                for (userSnapshot in snapshot.children) {
+                    if (userSnapshot.key == userID) {
+                        for (postSnapshot in userSnapshot.children) {
+                            val post = postSnapshot.getValue(Post::class.java)
+                            post?.let { imageList.add(it) }
+                        }
+                    }
+                }
+                imageList.sortByDescending { it.timestamp }
+
+                // Cập nhật adapter sau khi dữ liệu thay đổi
+                imageAdapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Xử lý lỗi nếu có
+                Toast.makeText(context, "Lỗi: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
     override fun onResume() {
         super.onResume()
-        loadUserData() // Tải lại thông tin người dùng khi Fragment hiển thị
+
+        loadUserData()
     }
 
     private fun loadUserData() {
@@ -119,7 +179,10 @@ class ProfileFragment : Fragment() {
         }
     }
 
+
+
     private fun updateUI(user: User) {
+
         usernameTextView.text = user.name
         postsTextView.text = "${user.post} post"
         followersTextView.text = "${user.followers} follower"

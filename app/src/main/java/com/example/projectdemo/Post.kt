@@ -1,4 +1,6 @@
 package com.example.projectdemo
+import android.os.Parcelable
+import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -14,11 +16,12 @@ data class Post(
     var formattedDate: String = formatDate(timestamp), // Ngày tháng năm dưới dạng chuỗi
     var likes: Int = 0, // Số lượt thích
     var commentsCount: Int = 0, // Số bình luận
-    var likedBy: List<String> = listOf(), // Danh sách ID người thích bài
+    var likedBy: List<String> = listOf(),
+    var CommentBy: List<Comment> = listOf(),// Danh sách ID người thích bài
     var sharedCount: Int = 0, // Số lần chia sẻ
     var status: String = "public", // Trạng thái bài đăng
     var location: String? = null // Vị trí
-) {
+): Serializable {
     // Hàm định dạng timestamp thành chuỗi ngày tháng năm
     companion object {
         fun formatDate(timestamp: Long): String {

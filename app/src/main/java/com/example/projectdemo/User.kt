@@ -1,15 +1,16 @@
 package com.example.projectdemo
 
 data class User(
-    val userID: String = "",
-    val name: String = "",
-    val email: String = "",
-    val birthday: String = "",
-    val gender: String = "",
-    val img: String = "",
-    val post: Int = 0,
-    val followers: Int = 0,
-    val following: Int = 0,
+    var userID: String = "",
+    var name: String = "",
+    var email: String = "",
+    var birthday: String = "",
+    var gender: String = "",
+    var img: String = "",
+    var post: Int = 0,
+    var followers: Int = 0,
+    var following: Int = 0,
     var biography:String="",
     var avatar:String=""
+
 )

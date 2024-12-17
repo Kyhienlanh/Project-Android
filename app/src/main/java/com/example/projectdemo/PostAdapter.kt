@@ -21,6 +21,7 @@ interface OnPostActionListener {
     fun onCommentClicked(post: Post)
     fun onShareClicked(post: Post)
     fun onOptionsClicked(post: Post)
+    fun onNameClicked(post: Post)
 }
 
 
@@ -114,6 +115,12 @@ class PostAdapter(
 
             optionsIcon.setOnClickListener {
                 listener.onOptionsClicked(post)
+            }
+            userName.setOnClickListener {
+                listener.onNameClicked(post)
+            }
+            userAvatar.setOnClickListener(){
+                listener.onNameClicked(post)
             }
         }
     }

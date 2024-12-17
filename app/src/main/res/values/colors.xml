@@ -16,6 +16,6 @@
     <color name="my_dark_primary">#BB86FC</color> <!-- Màu xanh dương nhạt cho chế độ tối -->
     <color name="your_desired_color">#FF5722</color> <!-- Màu cam cho nút -->
     <color name="ChuDao">#1877F2</color>
-
+    <color name="red">#BD1536</color>
 
 </resources>
