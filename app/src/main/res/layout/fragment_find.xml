@@ -5,10 +5,37 @@
     android:layout_height="match_parent"
     tools:context=".FindFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="find" />
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- EditText cho việc tìm kiếm -->
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nhập tên người dùng..."
+            android:inputType="text" />
+
+
+        <TextView
+            android:id="@+id/tvSearchHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lịch sử tìm kiếm:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"/>
+
+        <!-- RecyclerView để hiển thị danh sách người dùng -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewUsers"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"/>
+    </LinearLayout>
 
 </FrameLayout>

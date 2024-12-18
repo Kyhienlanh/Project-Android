@@ -1,10 +1,17 @@
 package com.example.projectdemo
 
+import android.app.Activity
 import android.app.ActivityOptions
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -15,6 +22,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +34,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -72,7 +83,7 @@ class HomeFragment : Fragment(), OnPostActionListener {
 
         // Load dữ liệu từ Firebase
         loadPostsFromFirebase()
-
+        listenForNotifications(userID, requireContext())
         return view
     }
     private fun loadPostsFromFirebase() {
@@ -115,6 +126,7 @@ class HomeFragment : Fragment(), OnPostActionListener {
 
         val intent = Intent(context, commentActivity::class.java).apply {
             putExtra("post_data", post.postID)
+
         }
         val options = ActivityOptions.makeCustomAnimation(
             requireActivity(),
@@ -279,13 +291,14 @@ class HomeFragment : Fragment(), OnPostActionListener {
                                 val postRef = postSnapshot.ref // Lấy tham chiếu trực tiếp đến bài viết
 
                                 if (post.likedBy.contains(currentUserID)) {
-                                    // Nếu user đã thích, bỏ thích (unlike)
+
                                     post.likedBy = post.likedBy.filter { it != currentUserID }
                                     post.likes = post.likedBy.size
                                 } else {
                                     // Nếu user chưa thích, thêm vào danh sách likedBy
                                     post.likedBy = post.likedBy + currentUserID
                                     post.likes = post.likedBy.size
+                                    sendLikeNotification(currentUserID, post.userID, post.postID)
                                 }
 
                                 // Cập nhật lại bài viết trong Firebase
@@ -307,6 +320,154 @@ class HomeFragment : Fragment(), OnPostActionListener {
             }
         })
     }
+
+    private fun getUserFromId(userId: String, callback: (User?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val usersRef = database.getReference("Users") // Thay "users" bằng tên node của bạn trong database
+
+        usersRef.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Chuyển đổi snapshot thành User
+                    val user = snapshot.getValue(User::class.java)
+                    callback(user)
+                } else {
+                    callback(null) // Không tìm thấy user
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                callback(null) // Lỗi xảy ra
+            }
+        })
+    }
+
+    data class Notification(
+        val message: String? = null,
+        val timestamp: Long? = null,
+        val postID: String? = null,
+        val type: String? = null,
+        val sent: Boolean = false // Mới thêm thuộc tính sent để theo dõi trạng thái đã gửi
+    )
+
+
+    fun sendLikeNotification(likerID: String, postOwnerID: String, postID: String) {
+        val database = FirebaseDatabase.getInstance().reference
+
+        // Kiểm tra nếu đã gửi thông báo trước đó
+        database.child("likes").child(postID).child(likerID).child("notified").get()
+            .addOnSuccessListener { snapshot ->
+                val notified = snapshot.getValue(Boolean::class.java) ?: false
+                if (!notified) {
+                    // Chưa thông báo, tiếp tục xử lý
+                    getUserFromId(likerID) { user ->
+                        val name = user?.name ?: "Người dùng"
+
+                        // Tạo thông báo
+                        val notification = Notification(
+                            message = "$name đã thích bài viết của bạn!",
+                            timestamp = System.currentTimeMillis(),
+                            postID = postID,
+                            type = "like",
+                            sent = false // Mới tạo, chưa gửi thông báo
+                        )
+
+                        // Lưu thông báo vào Firebase
+                        database.child("notifications")
+                            .child(postOwnerID)
+                            .push()
+                            .setValue(notification)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d("Notification", "Thông báo đã được gửi thành công.")
+
+                                    // Đánh dấu sự kiện là đã thông báo
+                                    database.child("likes").child(postID).child(likerID)
+                                        .child("notified").setValue(true)
+                                        .addOnCompleteListener {
+                                            // Sau khi cập nhật "notified", bạn có thể tiếp tục các thao tác khác nếu cần
+                                        }
+                                } else {
+                                    Log.d("Notification", "Gửi thông báo không thành công: ${task.exception}")
+                                }
+                            }
+                    }
+                } else {
+                    Log.d("Notification", "Thông báo đã được gửi trước đó, không gửi lại.")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Notification", "Lỗi khi kiểm tra trạng thái thông báo: ${exception.message}")
+            }
+    }
+
+
+
+    fun listenForNotifications(userID: String, context: Context) {
+        val database = FirebaseDatabase.getInstance().reference
+
+        database.child("notifications").child(userID)
+            .addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    val notification = snapshot.getValue(Notification::class.java)
+                    if (notification != null && notification.message != null && !notification.sent) {
+                        // Hiển thị thông báo
+                        showNotification(context, notification.message)
+
+                        // Sau khi hiển thị thông báo, đánh dấu thông báo là đã gửi
+                        snapshot.ref.child("sent").setValue(true)
+                    } else {
+                        Log.d("Notification", "Thông báo không hợp lệ hoặc đã gửi trước đó.")
+                    }
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+                override fun onChildRemoved(snapshot: DataSnapshot) {}
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Log.d("Notification", "Lỗi lắng nghe thông báo: ${error.message}")
+                }
+            })
+    }
+
+
+
+
+
+    fun showNotification(context: Context, message: String?) {
+        if (message == null) {
+            Log.d("Notification", "Message is null, không hiển thị thông báo.")
+            return
+        }
+
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationChannelId = "user_notifications_channel"
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                notificationChannelId,
+                "User Notifications",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(context, notificationChannelId)
+            .setContentTitle("Thông báo mới")
+            .setContentText(message)
+            .setSmallIcon(R.drawable.timdo)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+    }
+
+
+
+
+
+
 
 
 }

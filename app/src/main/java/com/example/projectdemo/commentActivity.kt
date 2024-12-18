@@ -73,6 +73,7 @@ class commentActivity : AppCompatActivity() {
                     timestamp = System.currentTimeMillis()
                 )
                 addUserIDToCmtBy(postId.toString(), newComment)
+
             } else {
                 Toast.makeText(this, "Vui lòng nhập bình luận", Toast.LENGTH_SHORT).show()
             }
