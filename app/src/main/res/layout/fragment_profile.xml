@@ -179,14 +179,18 @@
             android:id="@+id/editProfileButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit profile"
+            app:rippleColor="@color/black"
+            android:text="Sửa thông tin "
+            android:background="@drawable/button_rounded"
             android:layout_marginEnd="8dp" />
 
         <Button
             android:id="@+id/viewArchiveButton"
-            android:layout_width="wrap_content"
+            android:layout_width="157dp"
             android:layout_height="wrap_content"
-            android:text="View archive" />
+            app:rippleColor="@color/black"
+            android:background="@drawable/button_rounded"
+            android:text=" mục yêu thích" />
     </LinearLayout>
 
     <!-- RecyclerView for posts in grid layout -->

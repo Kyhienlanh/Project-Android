@@ -1,0 +1,69 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <!-- Ngày -->
+    <TextView
+        android:id="@+id/textViewDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hôm nay"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <!-- Biểu tượng thời tiết sáng -->
+    <ImageView
+        android:id="@+id/imageViewWeatherIconMorning"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@id/textViewDate"
+        app:layout_constraintTop_toTopOf="@id/textViewDate"
+        app:layout_constraintBottom_toBottomOf="@id/textViewDate" />
+
+    <!-- Biểu tượng thời tiết tối -->
+    <ImageView
+        android:id="@+id/imageViewWeatherIconNight"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@id/imageViewWeatherIconMorning"
+        app:layout_constraintTop_toTopOf="@id/imageViewWeatherIconMorning"
+        app:layout_constraintBottom_toBottomOf="@id/imageViewWeatherIconMorning" />
+
+    <!-- Nhiệt độ tối đa sáng -->
+    <TextView
+        android:id="@+id/textViewTempMaxMorning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="33°"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toEndOf="@id/imageViewWeatherIconNight"
+        app:layout_constraintTop_toTopOf="@id/imageViewWeatherIconNight"
+        app:layout_constraintBottom_toBottomOf="@id/imageViewWeatherIconNight" />
+
+    <!-- Nhiệt độ tối đa tối -->
+    <TextView
+        android:id="@+id/textViewTempMaxNight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="24°"
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@id/textViewTempMaxMorning"
+        app:layout_constraintTop_toTopOf="@id/textViewTempMaxMorning"
+        app:layout_constraintBottom_toBottomOf="@id/textViewTempMaxMorning"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

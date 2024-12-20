@@ -15,6 +15,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.text.SimpleDateFormat
+import java.util.Date
 
 
 class CommentAdapter(private val commentList: List<Comment>, var userID: String) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
@@ -40,7 +42,16 @@ class CommentAdapter(private val commentList: List<Comment>, var userID: String)
 
         fun bind(comment: Comment, adapter: CommentAdapter) {
             tvCommentContent.text = comment.content
-            tvTimestamp.text = comment.timestamp.toString()
+
+            fun convertTimestampToDate(timestamp: Long): String {
+                // Chuyển timestamp (mili giây) thành đối tượng Date
+                val date = Date(timestamp)
+
+                // Định dạng ngày giờ
+                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                return formatter.format(date)
+            }
+            tvTimestamp.text = convertTimestampToDate(comment.timestamp)
 
             // Gọi phương thức getUserFromId từ CommentAdapter để lấy thông tin người dùng
             adapter.getUserFromId(comment.userID) { user ->
@@ -53,8 +64,10 @@ class CommentAdapter(private val commentList: List<Comment>, var userID: String)
                     tvUserName.text = "Unknown User"
                 }
             }
+
         }
     }
+
 
     private fun getUserFromId(userId: String, callback: (User?) -> Unit) {
         val database = FirebaseDatabase.getInstance()

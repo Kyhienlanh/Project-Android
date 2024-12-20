@@ -15,6 +15,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.text.SimpleDateFormat
+import java.util.Date
 
 interface OnPostActionListener {
     fun onLikeClicked(post: Post)
@@ -67,12 +69,12 @@ class PostAdapter(
         private val context = itemView.context
         fun bind(post: Post) {
             // Set user data
-          
-            location.text = post.location ?: ""
+
+            location.text = convertTimestampToDate(post.timestamp)
             postContent.text = post.content
             getUserFromId(post.userID) { user ->
                 if (user != null) {
-                    userName.text = user.name
+                    userName.text = user.name+" " + post.CamSucHoatDong
                     if (!user.img.isNullOrEmpty()) {
                         Glide.with(context).load(user.img).into(userAvatar)
                     } else {
@@ -123,6 +125,14 @@ class PostAdapter(
                 listener.onNameClicked(post)
             }
         }
+    }
+    fun convertTimestampToDate(timestamp: Long): String {
+        // Chuyển timestamp (mili giây) thành đối tượng Date
+        val date = Date(timestamp)
+
+        // Định dạng ngày giờ
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return formatter.format(date)
     }
     // Trong PostAdapter
     private fun getUserFromId(userId: String, callback: (User?) -> Unit) {

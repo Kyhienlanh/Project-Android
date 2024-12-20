@@ -73,6 +73,8 @@ class commentActivity : AppCompatActivity() {
                     timestamp = System.currentTimeMillis()
                 )
                 addUserIDToCmtBy(postId.toString(), newComment)
+                etComment.text.clear()
+                Toast.makeText(this, "Đã gửi bình luận", Toast.LENGTH_SHORT).show()
 
             } else {
                 Toast.makeText(this, "Vui lòng nhập bình luận", Toast.LENGTH_SHORT).show()
@@ -94,8 +96,8 @@ class commentActivity : AppCompatActivity() {
                     // Duyệt qua từng post của user
                     for (postSnapshot in userSnapshot.children) {
                         // Kiểm tra nếu post này có postID trùng khớp
+
                         if (postSnapshot.key == postID) {
-                            // Lấy danh sách comment
                             val commentsSnapshot = postSnapshot.child("commentBy")
 
                             // Duyệt qua các bình luận trong "commentBy"
@@ -114,7 +116,7 @@ class commentActivity : AppCompatActivity() {
 
                 CmtList.sortByDescending { it.timestamp }
 
-                // Thông báo adapter đã có thay đổi dữ liệu
+
                 CommentAdapter.notifyDataSetChanged()
             }
 
@@ -150,7 +152,7 @@ class commentActivity : AppCompatActivity() {
 
     fun addUserIDToCmtBy(postID: String, newComment: Comment) {
         val postsRef = FirebaseDatabase.getInstance().getReference("posts")
-
+        val currentUserID=firebaseAuth.currentUser?.uid.toString()
         postsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (userSnapshot in snapshot.children) {
@@ -158,6 +160,7 @@ class commentActivity : AppCompatActivity() {
                         if (postSnapshot.key == postID) {
                             val post = postSnapshot.getValue(Post::class.java)
                             if (post != null) {
+
                                 val postRef = postSnapshot.ref
                                 val updatedComments = post.CommentBy.toMutableList()
 
@@ -167,6 +170,7 @@ class commentActivity : AppCompatActivity() {
 
                                 // Thêm bình luận mới
                                 updatedComments.add(commentWithID)
+
                                 post.CommentBy = updatedComments
 
                                 // Tăng commentsCount
@@ -192,4 +196,7 @@ class commentActivity : AppCompatActivity() {
             }
         })
     }
+
+
+
 }

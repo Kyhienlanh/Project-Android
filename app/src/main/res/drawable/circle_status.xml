@@ -1,0 +1,14 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Màu xanh cho online -->
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <solid android:color="#4CAF50" /> <!-- Màu xanh -->
+        </shape>
+    </item>
+    <!-- Màu xám cho offline -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#BDBDBD" /> <!-- Màu xám -->
+        </shape>
+    </item>
+</selector>

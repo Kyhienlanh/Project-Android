@@ -1,13 +1,17 @@
 package com.example.projectdemo
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
@@ -20,7 +24,7 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
 
-class TrangCaNhan : AppCompatActivity() {
+class TrangCaNhan : AppCompatActivity(),OnImageClickListener {
     private lateinit var postsTextView:TextView
     private lateinit var followersTextView:TextView
     private lateinit var followingTextView:TextView
@@ -33,6 +37,9 @@ class TrangCaNhan : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private lateinit var UserIDCurrent:String
+    private lateinit var imageAdapter: ImageAdapter
+    private lateinit var progressBar3: ProgressBar
+    private var imageList = mutableListOf<Post>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,10 +61,21 @@ class TrangCaNhan : AppCompatActivity() {
         firebaseAuth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().getReference("Users")
         Name=findViewById(R.id.Name)
+        progressBar3=findViewById(R.id.progressBar3)
 
         val IDUser = intent.getSerializableExtra("post_data")
-        UserIDCurrent=firebaseAuth.currentUser?.uid.toString()
+        postsRecyclerView=findViewById(R.id.postsRecyclerView)
+        postsRecyclerView.layoutManager = GridLayoutManager(this, 3)
+        imageAdapter = ImageAdapter(imageList, this)
+        postsRecyclerView.adapter = imageAdapter
+        loadImageUser(IDUser.toString())
 
+
+        UserIDCurrent=firebaseAuth.currentUser?.uid.toString()
+        NhanTinButton.setOnClickListener(){
+            val intent = Intent(this, ChatActivity::class.java)
+            startActivity(intent)
+        }
         getUserFromId(IDUser.toString()) { user ->
             if (user != null) {
                 Name.text = user.name
@@ -143,7 +161,40 @@ class TrangCaNhan : AppCompatActivity() {
         }
 
     }
+    override fun onImageClick(post: Post) {
 
+    }
+
+    fun loadImageUser(Iduser:String) {
+        progressBar3.visibility= View.VISIBLE
+
+        val databaseReference = FirebaseDatabase.getInstance().getReference("posts")
+
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                imageList.clear()
+
+                // Duyệt qua tất cả các userID
+                for (userSnapshot in snapshot.children) {
+                    if (userSnapshot.key == Iduser) {
+                        for (postSnapshot in userSnapshot.children) {
+                            val post = postSnapshot.getValue(Post::class.java)
+                            post?.let { imageList.add(it) }
+                        }
+                    }
+                }
+                imageList.sortByDescending { it.timestamp }
+
+
+                imageAdapter.notifyDataSetChanged()
+                progressBar3.visibility= View.GONE
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
+    }
     fun addFollowUserID(currentUserID: String, targetUserID: String) {
         val followRef = FirebaseDatabase.getInstance().getReference("Follow")
         val usersRef = FirebaseDatabase.getInstance().getReference("Users")

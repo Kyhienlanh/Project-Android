@@ -17,6 +17,8 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.collection.floatIntMapOf
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -81,6 +83,20 @@ class ProfileFragment : Fragment(),OnImageClickListener {
         followingTextView = view.findViewById(R.id.followingTextView)
         biographyTextView = view.findViewById(R.id.biographyTextView)
         img = view.findViewById(R.id.avatarImageView)
+        val iconSearch=view.findViewById<ImageView>(R.id.iconSearch)
+        iconSearch.setOnClickListener(){
+            val intent = Intent(context, ChatActivity::class.java)
+            startActivity(intent)
+        }
+        val iconNotifications=view.findViewById<ImageView>(R.id.iconNotifications)
+        iconNotifications.setOnClickListener(){
+            val intent = Intent(context, AddNewsFeed::class.java)
+            startActivity(intent)
+        }
+        val viewArchiveButton=view.findViewById<Button>(R.id.viewArchiveButton)
+        viewArchiveButton.setOnClickListener(){
+
+        }
         progressBar3=view.findViewById(R.id.progressBar3)
 
         postsRecyclerView=view.findViewById(R.id.postsRecyclerView)

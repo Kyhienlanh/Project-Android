@@ -8,6 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+data class Notification(
+    val message: String? = null,
+    val timestamp: Long? = null,
+    val postID: String? = null,
+    val type: String? = null,
+    val sent: Boolean = false
+)
 
 class NotificationAdapter(private val notifications: List<Notification>) :
     RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder>() {

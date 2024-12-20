@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -80,10 +81,19 @@ class HomeFragment : Fragment(), OnPostActionListener {
         // Khởi tạo Adapter
         postAdapter = PostAdapter(postList,this@HomeFragment,userID)
         recyclerView.adapter = postAdapter
-
+        val imageView3=view.findViewById<ImageView>(R.id.imageView3)
+        imageView3.setOnClickListener(){
+            val intent = Intent(context, ChatActivity::class.java)
+            startActivity(intent)
+        }
+        val imageView4=view.findViewById<ImageView>(R.id.imageView4)
+        imageView4.setOnClickListener(){
+            val intent = Intent(context, WeatherActivity3::class.java)
+            startActivity(intent)
+        }
         // Load dữ liệu từ Firebase
         loadPostsFromFirebase()
-        listenForNotifications(userID, requireContext())
+//        listenForNotifications(userID, requireContext())
         return view
     }
     private fun loadPostsFromFirebase() {
@@ -347,7 +357,7 @@ class HomeFragment : Fragment(), OnPostActionListener {
         val timestamp: Long? = null,
         val postID: String? = null,
         val type: String? = null,
-        val sent: Boolean = false // Mới thêm thuộc tính sent để theo dõi trạng thái đã gửi
+        val sent: Boolean = false
     )
 
 
@@ -369,7 +379,7 @@ class HomeFragment : Fragment(), OnPostActionListener {
                             timestamp = System.currentTimeMillis(),
                             postID = postID,
                             type = "like",
-                            sent = false // Mới tạo, chưa gửi thông báo
+                            sent = true // Mới tạo, chưa gửi thông báo
                         )
 
                         // Lưu thông báo vào Firebase
