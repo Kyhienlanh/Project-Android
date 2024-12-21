@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +20,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import org.json.JSONObject
+
+
 class ChatWithFActivity3 : AppCompatActivity() {
     private lateinit var avatarImageView: ImageView
     private lateinit var usernameTextView: TextView
@@ -40,12 +44,14 @@ class ChatWithFActivity3 : AppCompatActivity() {
             insets
         }
 
+
         firebaseAuth=FirebaseAuth.getInstance()
         avatarImageView = findViewById(R.id.avatarImageView)
         usernameTextView = findViewById(R.id.usernameTextView)
         messagesRecyclerView = findViewById(R.id.messagesRecyclerView)
         messageEditText = findViewById(R.id.messageEditText)
         sendButton = findViewById(R.id.sendButton)
+
         userID = intent.getStringExtra("UserID_data").toString()
         if (userID == null) {
             Log.d("UserInfo", "User ID is null")
@@ -58,12 +64,17 @@ class ChatWithFActivity3 : AppCompatActivity() {
         messagesRecyclerView.adapter = messageAdapter
         getUserById(userID.toString())
 
+
         val chatID = generateChatID(userIDCurrent,userID)
         listenForMessages(chatID)
         sendButton.setOnClickListener {
             sendMessage()
         }
+
     }
+
+
+
     fun generateChatID(userID1: String, userID2: String): String {
         val sortedIDs = listOf(userID1, userID2).sorted()
         return sortedIDs[0] + "_" + sortedIDs[1]  // Sắp xếp và tạo chatID cố định

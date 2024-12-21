@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/main"
+    android:fitsSystemWindows="true"
+    android:layout_height="match_parent">
+
+    <!-- RecyclerView for displaying chat messages -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_above="@id/ChatAI"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- EditText for typing messages -->
+    <EditText
+        android:id="@+id/ChatAI"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:hint="Type your message"
+        android:padding="10dp"
+        android:fitsSystemWindows="true"
+        android:textSize="16sp"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- Button to send message -->
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:fitsSystemWindows="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"/>
+
+</RelativeLayout>

@@ -4,6 +4,7 @@ import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ class ChatActivity : AppCompatActivity(), OnUserActionListener {
     private lateinit var chatAdapter: ChatAdapter
     private val userList = mutableListOf<User>()
     private lateinit var database: DatabaseReference
+    private lateinit var btnBottomRight:Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,16 +36,22 @@ class ChatActivity : AppCompatActivity(), OnUserActionListener {
             insets
         }
         recyclerView = findViewById(R.id.recyclerViewHorizontal)
-
+        btnBottomRight=findViewById(R.id.btnBottomRight)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         chatAdapter = ChatAdapter(userList,this)
         recyclerView.adapter = chatAdapter
         loaddata()
+        btnBottomRight.setOnClickListener(){
+            var intent=Intent(this,ChatBotActivity3::class.java)
+            startActivity(intent)
+        }
 
     }
     override fun onUserClicked(user: User) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
         val intent = Intent(this, ChatWithFActivity3::class.java).apply {
             putExtra("UserID_data", user.userID)
+
         }
 
         startActivity(intent)
@@ -72,6 +80,7 @@ class ChatActivity : AppCompatActivity(), OnUserActionListener {
             }
         })
     }
+
 
 
 }
